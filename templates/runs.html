@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}运行记录{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>运行记录</h1>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>类型</th><th>状态</th><th>开始</th><th>结束</th><th>默认主题</th><th>标题</th><th>详情</th></tr>
+      </thead>
+      <tbody>
+      {% for run in runs %}
+        <tr>
+          <td>{{ run.id }}</td>
+          <td>{{ run.run_type }}</td>
+          <td>{{ "成功" if run.success else "失败" }}</td>
+          <td>{{ run.started_at }}</td>
+          <td>{{ run.finished_at or "-" }}</td>
+          <td>{{ run.topic_counts or "-" }}</td>
+          <td>{{ run.email_subject or "-" }}</td>
+          <td><a href="/runs?run_id={{ run.id }}">查看</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% if selected_run %}
+<section class="panel">
+  <h2>运行详情 #{{ selected_run.id }}</h2>
+  <dl class="detail-grid">
+    <dt>类型</dt><dd>{{ selected_run.run_type }}</dd>
+    <dt>状态</dt><dd>{{ "成功" if selected_run.success else "失败" }}</dd>
+    <dt>邮件标题</dt><dd>{{ selected_run.email_subject or "-" }}</dd>
+    <dt>错误</dt><dd class="error-text">{{ selected_run.error_message or "-" }}</dd>
+  </dl>
+  {% if selected_run.html_snapshot %}
+    <h3>HTML 快照</h3>
+    <form method="post" action="/runs/{{ selected_run.id }}/resend" class="inline confirm-form" data-confirm="确认重发此日报给所有收件人吗？">
+      <button type="submit">重发此日报给所有收件人</button>
+    </form>
+    <div class="preview-frame">{{ selected_run.html_snapshot | safe }}</div>
+  {% endif %}
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>最近日志</h2>
+  <pre class="log-box">{{ log_tail }}</pre>
+</section>
+{% endblock %}

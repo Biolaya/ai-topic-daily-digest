@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.name }} 搜索模板{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="subnav">
+    <a href="/topics">返回主题</a>
+    <a href="/topics/{{ topic.id }}/keywords">关键词</a>
+    <a href="/topics/{{ topic.id }}/sources">来源评分</a>
+  </div>
+  <h1>{{ topic.name }} 搜索模板</h1>
+  <p class="muted">启用搜索模板后会优先使用模板搜索；没有模板时才自动拼接关键词。</p>
+  <form method="post" action="/topics/{{ topic.id }}/queries/save" class="grid-form">
+    <input type="hidden" name="id" value="{{ edit_query.id if edit_query else '' }}">
+    <label class="wide">搜索语句
+      <textarea name="query_text" rows="3" required>{{ edit_query.query_text if edit_query else '' }}</textarea>
+    </label>
+    <label>语言
+      <select name="language">
+        {% for lang in ["mixed", "zh", "en"] %}
+          <option value="{{ lang }}" {% if edit_query and edit_query.language == lang %}selected{% endif %}>{{ lang }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>优先级
+      <input name="priority" type="number" min="0" max="100" value="{{ edit_query.priority if edit_query else 5 }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="enabled" type="checkbox" {% if not edit_query or edit_query.enabled %}checked{% endif %}> 启用
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">{{ "保存搜索模板" if edit_query else "新增搜索模板" }}</button>
+      {% if edit_query %}<a class="button secondary" href="/topics/{{ topic.id }}/queries">取消编辑</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>搜索模板列表</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>搜索语句</th><th>语言</th><th>优先级</th><th>状态</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+      {% for item in queries %}
+        <tr>
+          <td>{{ item.query_text }}</td>
+          <td>{{ item.language }}</td>
+          <td>{{ item.priority }}</td>
+          <td>{{ "启用" if item.enabled else "禁用" }}</td>
+          <td class="row-actions">
+            <a href="/topics/{{ topic.id }}/queries?edit_id={{ item.id }}">编辑</a>
+            <form method="post" action="/topics/{{ topic.id }}/queries/{{ item.id }}/toggle" class="inline"><button type="submit" class="small">{{ "禁用" if item.enabled else "启用" }}</button></form>
+            <form method="post" action="/topics/{{ topic.id }}/queries/{{ item.id }}/delete" class="inline delete-form"><button type="submit" class="small danger">删除</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

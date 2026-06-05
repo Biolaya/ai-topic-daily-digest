@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}收件人管理{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>收件人管理</h1>
+  <p class="muted">启用的数据库收件人会优先于 .env 的 MAIL_TO；如果这里没有启用收件人，则回退到 MAIL_TO。</p>
+  <form method="post" action="/recipients/save" class="grid-form">
+    <input type="hidden" name="id" value="{{ edit_recipient.id if edit_recipient else '' }}">
+    <label>邮箱
+      <input name="email" type="email" value="{{ edit_recipient.email if edit_recipient else '' }}" placeholder="name@example.com" required>
+    </label>
+    <label>名称
+      <input name="name" value="{{ edit_recipient.name if edit_recipient else '' }}" placeholder="主邮箱">
+    </label>
+    <label>备注
+      <input name="note" value="{{ edit_recipient.note if edit_recipient else '' }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="enabled" type="checkbox" {% if not edit_recipient or edit_recipient.enabled %}checked{% endif %}> 启用
+    </label>
+    <label class="checkbox-row">
+      <input name="is_default" type="checkbox" {% if edit_recipient and edit_recipient.is_default %}checked{% endif %}> 默认
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">{{ "保存收件人" if edit_recipient else "新增收件人" }}</button>
+      {% if edit_recipient %}<a class="button secondary" href="/recipients">取消编辑</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>收件人列表</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>邮箱</th><th>名称</th><th>状态</th><th>默认</th><th>备注</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+      {% for recipient in recipients %}
+        <tr>
+          <td>{{ recipient.email }}</td>
+          <td>{{ recipient.name or "-" }}</td>
+          <td>{{ "启用" if recipient.enabled else "禁用" }}</td>
+          <td>{{ "是" if recipient.is_default else "否" }}</td>
+          <td>{{ recipient.note or "-" }}</td>
+          <td class="row-actions">
+            <a href="/recipients?edit_id={{ recipient.id }}">编辑</a>
+            <form method="post" action="/recipients/{{ recipient.id }}/toggle" class="inline"><button type="submit" class="small">{{ "禁用" if recipient.enabled else "启用" }}</button></form>
+            <form method="post" action="/recipients/{{ recipient.id }}/send-test" class="inline"><button type="submit" class="small">测试</button></form>
+            <form method="post" action="/recipients/{{ recipient.id }}/delete" class="inline delete-form"><button type="submit" class="small danger">删除</button></form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="muted">暂无数据库收件人，将使用 .env 或设置页里的 MAIL_TO。</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,131 @@
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #0f766e;
+  --danger: #b91c1c;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+a { color: var(--primary); text-decoration: none; }
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand { font-weight: 800; color: #111827; }
+nav { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.page { max-width: 1120px; margin: 0 auto; padding: 20px; }
+.hero, .panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.hero { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+h1, h2, h3 { margin: 0 0 12px; line-height: 1.3; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.actions, .form-actions, .row-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+button, .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.secondary { background: #fff; color: var(--primary); }
+.danger { background: var(--danger); border-color: var(--danger); }
+.small { min-height: 30px; padding: 5px 8px; font-size: 13px; }
+.link-button { background: transparent; border: 0; color: var(--primary); padding: 0; min-height: 0; }
+.inline { display: inline; margin: 0; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.metric {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.metric span { display: block; color: var(--muted); font-size: 13px; }
+.metric strong { display: block; font-size: 28px; margin-top: 4px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { font-size: 13px; color: var(--muted); background: #fafafa; }
+.grid-form { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.grid-form label, .form-stack label { display: grid; gap: 5px; font-weight: 600; font-size: 14px; }
+input, select, textarea {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px;
+  font: inherit;
+}
+textarea { resize: vertical; }
+.checkbox-row { display: flex !important; align-items: center; gap: 8px; }
+.checkbox-row input { width: auto; min-height: auto; }
+.wide { grid-column: 1 / -1; }
+.detail-grid { display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px; }
+dt { color: var(--muted); }
+dd { margin: 0; }
+.error-text, .error { color: var(--danger); }
+.alert { padding: 10px; border: 1px solid #fecaca; background: #fef2f2; border-radius: 6px; }
+.preview-frame {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  overflow: auto;
+}
+.log-box {
+  white-space: pre-wrap;
+  background: #111827;
+  color: #e5e7eb;
+  padding: 14px;
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 520px;
+}
+.login-body { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+.login-panel {
+  width: min(420px, 100%);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+.form-stack { display: grid; gap: 12px; }
+.subnav { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+
+@media (max-width: 760px) {
+  .topbar { align-items: flex-start; flex-direction: column; padding: 12px; }
+  .page { padding: 12px; }
+  .hero { align-items: flex-start; flex-direction: column; }
+  .metrics { grid-template-columns: 1fr; }
+  .grid-form { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}

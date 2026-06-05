@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}主题管理{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>主题管理</h1>
+  <p class="muted">AI 和 Football 是默认主题，你可以继续添加 Minecraft、Finance、Coding Agents 等任意主题。</p>
+  <form method="post" action="/topics/save" class="grid-form">
+    <input type="hidden" name="id" value="{{ edit_topic.id if edit_topic else '' }}">
+    <label>名称
+      <input name="name" placeholder="Minecraft" value="{{ edit_topic.name if edit_topic else '' }}" required>
+    </label>
+    <label>Slug
+      <input name="slug" placeholder="minecraft" value="{{ edit_topic.slug if edit_topic else '' }}">
+    </label>
+    <label>语言
+      <select name="language">
+        {% for lang in ["mixed", "zh", "en"] %}
+          <option value="{{ lang }}" {% if edit_topic and edit_topic.language == lang %}selected{% endif %}>{{ lang }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>每日数量
+      <input name="daily_limit" type="number" min="1" max="20" value="{{ edit_topic.daily_limit if edit_topic else 8 }}">
+    </label>
+    <label>最低分数线
+      <input name="min_score" type="number" min="0" max="100" value="{{ edit_topic.min_score if edit_topic else 40 }}">
+    </label>
+    <label>优先级
+      <input name="priority" type="number" min="0" max="100" value="{{ edit_topic.priority if edit_topic else 5 }}">
+    </label>
+    <label class="wide">摘要风格
+      <input name="summary_style" value="{{ edit_topic.summary_style if edit_topic else 'concise' }}">
+    </label>
+    <label class="wide">描述
+      <textarea name="description" rows="3">{{ edit_topic.description if edit_topic else '' }}</textarea>
+    </label>
+    <label class="checkbox-row wide">
+      <input name="enabled" type="checkbox" {% if not edit_topic or edit_topic.enabled %}checked{% endif %}> 启用
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">{{ "保存主题" if edit_topic else "新增主题" }}</button>
+      {% if edit_topic %}<a class="button secondary" href="/topics">取消编辑</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>主题列表</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>主题</th><th>Slug</th><th>语言</th><th>数量</th><th>分数线</th><th>优先级</th><th>状态</th><th>配置</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+      {% for topic in topics %}
+        <tr>
+          <td>{{ topic.name }}</td>
+          <td>{{ topic.slug }}</td>
+          <td>{{ topic.language }}</td>
+          <td>{{ topic.daily_limit }}</td>
+          <td>{{ topic.min_score }}</td>
+          <td>{{ topic.priority }}</td>
+          <td>{{ "启用" if topic.enabled else "禁用" }}</td>
+          <td class="row-actions">
+            <a href="/topics/{{ topic.id }}/keywords">关键词</a>
+            <a href="/topics/{{ topic.id }}/queries">搜索模板</a>
+            <a href="/topics/{{ topic.id }}/sources">来源评分</a>
+          </td>
+          <td class="row-actions">
+            <a href="/topics?edit_id={{ topic.id }}">编辑</a>
+            <form method="post" action="/topics/{{ topic.id }}/toggle" class="inline"><button type="submit" class="small">{{ "禁用" if topic.enabled else "启用" }}</button></form>
+            <form method="post" action="/topics/{{ topic.id }}/delete" class="inline delete-form"><button type="submit" class="small danger">软删除</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

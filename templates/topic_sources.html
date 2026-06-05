@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.name }} 来源评分{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="subnav">
+    <a href="/topics">返回主题</a>
+    <a href="/topics/{{ topic.id }}/keywords">关键词</a>
+    <a href="/topics/{{ topic.id }}/queries">搜索模板</a>
+    <a href="/sources">全局来源</a>
+  </div>
+  <h1>{{ topic.name }} 来源评分</h1>
+  <p class="muted">主题专属来源评分优先于全局来源评分。</p>
+  <form method="post" action="/topics/{{ topic.id }}/sources/save" class="grid-form">
+    <input type="hidden" name="id" value="{{ edit_source.id if edit_source else '' }}">
+    <label>域名
+      <input name="domain" placeholder="example.com" value="{{ edit_source.domain if edit_source else '' }}" required>
+    </label>
+    <label>名称
+      <input name="name" value="{{ edit_source.name if edit_source else '' }}">
+    </label>
+    <label>基础分 0-100
+      <input name="base_score" type="number" min="0" max="100" value="{{ edit_source.base_score if edit_source else 45 }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="enabled" type="checkbox" {% if not edit_source or edit_source.enabled %}checked{% endif %}> 启用
+    </label>
+    <label class="wide">备注
+      <input name="note" value="{{ edit_source.note if edit_source else '' }}">
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">{{ "保存来源" if edit_source else "新增来源" }}</button>
+      {% if edit_source %}<a class="button secondary" href="/topics/{{ topic.id }}/sources">取消编辑</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>来源列表</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>域名</th><th>名称</th><th>基础分</th><th>状态</th><th>备注</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+      {% for item in sources %}
+        <tr>
+          <td>{{ item.domain }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.base_score }}</td>
+          <td>{{ "启用" if item.enabled else "禁用" }}</td>
+          <td>{{ item.note }}</td>
+          <td class="row-actions">
+            <a href="/topics/{{ topic.id }}/sources?edit_id={{ item.id }}">编辑</a>
+            <form method="post" action="/topics/{{ topic.id }}/sources/{{ item.id }}/toggle" class="inline"><button type="submit" class="small">{{ "禁用" if item.enabled else "启用" }}</button></form>
+            <form method="post" action="/topics/{{ topic.id }}/sources/{{ item.id }}/delete" class="inline delete-form"><button type="submit" class="small danger">删除</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

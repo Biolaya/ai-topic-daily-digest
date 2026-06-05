@@ -1,0 +1,12 @@
+tavily-python
+python-dotenv
+openai
+beautifulsoup4
+lxml
+pytest
+fastapi
+uvicorn
+jinja2
+python-multipart
+sqlmodel
+itsdangerous

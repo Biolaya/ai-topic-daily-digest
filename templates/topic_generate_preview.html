@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}生成主题预览{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>生成主题预览</h1>
+  {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+  {% if existing_topic %}
+    <p class="alert">Slug 已存在：{{ existing_topic.slug }}。确认时可选择合并到现有主题，否则请返回修改描述后重新生成。</p>
+  {% endif %}
+  <dl class="detail-grid">
+    <dt>名称</dt><dd>{{ suggestion.topic.name }}</dd>
+    <dt>Slug</dt><dd>{{ suggestion.topic.slug }}</dd>
+    <dt>语言</dt><dd>{{ suggestion.topic.language }}</dd>
+    <dt>每日数量</dt><dd>{{ suggestion.topic.daily_limit }}</dd>
+    <dt>最低分数线</dt><dd>{{ suggestion.topic.min_score }}</dd>
+    <dt>优先级</dt><dd>{{ suggestion.topic.priority }}</dd>
+    <dt>摘要风格</dt><dd>{{ suggestion.topic.summary_style }}</dd>
+    <dt>描述</dt><dd>{{ suggestion.topic.description }}</dd>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2>关键词</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>词</th><th>语言</th><th>权重</th><th>匹配</th><th>备注</th></tr></thead>
+      <tbody>
+      {% for item in suggestion.keywords %}
+        <tr><td>{{ item.word }}</td><td>{{ item.language }}</td><td>{{ item.weight }}</td><td>{{ item.match_type }}</td><td>{{ item.note }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>搜索模板</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Query</th><th>语言</th><th>优先级</th></tr></thead>
+      <tbody>
+      {% for item in suggestion.query_templates %}
+        <tr><td>{{ item.query_text }}</td><td>{{ item.language }}</td><td>{{ item.priority }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>来源评分</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>域名</th><th>名称</th><th>基础分</th><th>备注</th></tr></thead>
+      <tbody>
+      {% for item in suggestion.sources %}
+        <tr><td>{{ item.domain }}</td><td>{{ item.name }}</td><td>{{ item.base_score }}</td><td>{{ item.note }}</td></tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">未生成来源建议。</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <form method="post" action="/topics/generate/confirm" class="form-stack">
+    <textarea name="payload" hidden>{{ payload }}</textarea>
+    {% if existing_topic %}
+      <label class="checkbox-row">
+        <input name="merge_existing" type="checkbox"> 合并到现有 Slug 主题
+      </label>
+    {% endif %}
+    <div class="form-actions">
+      <button type="submit">确认写入数据库</button>
+      <a class="button secondary" href="/topics/generate">重新生成</a>
+      <a class="button secondary" href="/topics">取消</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

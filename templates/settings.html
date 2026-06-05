@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}设置{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>日报设置</h1>
+  <p class="muted">API Key、SMTP_PASS 等敏感密钥只从 .env 读取，不在网页中显示。</p>
+  <form method="post" action="/settings" class="grid-form">
+    <label>收件人 fallback
+      <input name="mail_to" value="{{ values.get('mail_to', '') }}" placeholder="a@gmail.com,b@qq.com">
+    </label>
+    <label>发送时间
+      <input name="send_time" type="time" value="{{ values.get('send_time', '06:00') }}">
+      <small class="muted">cron 按整点检查,到点后当天首次运行才发送,且当天仅发一次。</small>
+    </label>
+    <label class="wide">摘要风格
+      <input name="summary_style" value="{{ values.get('summary_style', '清晰、具体、简洁') }}">
+    </label>
+    <label class="checkbox-row wide">
+      <input name="auto_send_enabled" type="checkbox" {% if values.get('auto_send_enabled', 'true') == 'true' %}checked{% endif %}> 启用 cron 自动发送
+    </label>
+    <label>历史数据保留天数
+      <input name="retention_days" type="number" min="0" max="3650" value="{{ values.get('retention_days', '30') }}">
+      <small class="muted">0 = 不清理。超期的邮件 HTML 快照会被清空、历史新闻条目会被删除,去重记录不受影响。</small>
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">保存设置</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}AI 生成主题{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>AI 生成主题</h1>
+  <p class="muted">DeepSeek 会生成主题、关键词、搜索模板和来源建议。结果只会进入预览页，确认后才写入数据库。</p>
+  {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/topics/generate/preview" class="grid-form">
+    <label class="wide">兴趣描述
+      <textarea name="interest_description" rows="4" placeholder="例如：关注 Minecraft 服务端、模组加载器、PaperMC、Fabric、Forge 的新闻和版本变化。" required>{{ form.interest_description }}</textarea>
+    </label>
+    <label>偏好语言
+      <select name="preferred_language">
+        {% for lang in ["mixed", "zh", "en"] %}
+          <option value="{{ lang }}" {% if form.preferred_language == lang %}selected{% endif %}>{{ lang }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>每日数量
+      <input name="daily_limit" type="number" min="1" max="20" value="{{ form.daily_limit }}">
+    </label>
+    <label>最低分数线
+      <input name="min_score" type="number" min="0" max="100" value="{{ form.min_score }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="exclude_entertainment" type="checkbox" {% if form.exclude_entertainment %}checked{% endif %}> 排除娱乐八卦
+    </label>
+    <label class="checkbox-row">
+      <input name="exclude_sports" type="checkbox" {% if form.exclude_sports %}checked{% endif %}> 排除体育
+    </label>
+    <label class="checkbox-row">
+      <input name="include_zh_sources" type="checkbox" {% if form.include_zh_sources %}checked{% endif %}> 包含中文来源
+    </label>
+    <label class="checkbox-row">
+      <input name="include_en_sources" type="checkbox" {% if form.include_en_sources %}checked{% endif %}> 包含英文来源
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">生成并预览</button>
+      <a class="button secondary" href="/topics">返回主题管理</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

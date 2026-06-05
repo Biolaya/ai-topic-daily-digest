@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Dashboard</h1>
+    <p>主题订阅日报运行状态、配置入口和手动操作。</p>
+  </div>
+  <div class="actions">
+    <a class="button" href="/preview">立即预览日报</a>
+    <form method="post" action="/send-now" class="inline confirm-form" data-confirm="确认立即发送今日日报给所有收件人吗？此操作会真实发送邮件。">
+      <button type="submit">立即发送日报</button>
+    </form>
+    <form method="post" action="/send-test" class="inline">
+      <button type="submit">发送测试邮件</button>
+    </form>
+    <a class="button secondary" href="/topics">管理主题</a>
+    <a class="button secondary" href="/recipients">管理收件人</a>
+    <a class="button secondary" href="/topics/generate">AI 生成主题</a>
+    <a class="button secondary" href="/runs">查看日志</a>
+  </div>
+</section>
+
+<section class="metrics">
+  <div class="metric">
+    <span>启用主题</span>
+    <strong>{{ enabled_topic_count }}</strong>
+  </div>
+  <div class="metric">
+    <span>关键词总数</span>
+    <strong>{{ total_keyword_count }}</strong>
+  </div>
+  <div class="metric">
+    <span>启用收件人</span>
+    <strong>{{ enabled_recipient_count }}</strong>
+  </div>
+  {% if latest_run %}
+    <div class="metric">
+      <span>最近运行</span>
+      <strong>{{ "成功" if latest_run.success else "失败" }}</strong>
+    </div>
+  {% else %}
+    <div class="metric">
+      <span>最近运行</span>
+      <strong>-</strong>
+    </div>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>最近一次运行</h2>
+  {% if latest_run %}
+    <dl class="detail-grid">
+      <dt>状态</dt><dd>{{ "成功" if latest_run.success else "失败" }}</dd>
+      <dt>类型</dt><dd>{{ latest_run.run_type }}</dd>
+      <dt>开始</dt><dd>{{ latest_run.started_at }}</dd>
+      <dt>结束</dt><dd>{{ latest_run.finished_at or "-" }}</dd>
+      <dt>主题条数</dt><dd>{{ latest_run.topic_counts or "-" }}</dd>
+      <dt>标题</dt><dd>{{ latest_run.email_subject or "-" }}</dd>
+      {% if latest_run.error_message %}<dt>错误</dt><dd class="error-text">{{ latest_run.error_message }}</dd>{% endif %}
+    </dl>
+  {% else %}
+    <p class="muted">暂无运行记录。</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>今日主题新闻数量</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>主题</th><th>状态</th><th>今日入库新闻</th></tr>
+      </thead>
+      <tbody>
+      {% for item in topic_counts %}
+        <tr>
+          <td>{{ item.topic }}</td>
+          <td>{{ "启用" if item.enabled else "禁用" }}</td>
+          <td>{{ item.count }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>最近 7 次运行</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>类型</th><th>状态</th><th>开始时间</th><th>主题条数</th><th>标题</th><th>详情</th></tr>
+      </thead>
+      <tbody>
+      {% for run in recent_runs %}
+        <tr>
+          <td>{{ run.id }}</td>
+          <td>{{ run.run_type }}</td>
+          <td>{{ "成功" if run.success else "失败" }}</td>
+          <td>{{ run.started_at }}</td>
+          <td>{{ run.topic_counts or "-" }}</td>
+          <td>{{ run.email_subject or "-" }}</td>
+          <td><a href="/runs?run_id={{ run.id }}">查看</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ topic.name }} 关键词{% endblock %}
+{% block content %}
+<section class="panel">
+  <div class="subnav">
+    <a href="/topics">返回主题</a>
+    <a href="/topics/{{ topic.id }}/queries">搜索模板</a>
+    <a href="/topics/{{ topic.id }}/sources">来源评分</a>
+  </div>
+  <h1>{{ topic.name }} 关键词</h1>
+  <form method="post" action="/topics/{{ topic.id }}/keywords/save" class="grid-form">
+    <input type="hidden" name="id" value="{{ edit_keyword.id if edit_keyword else '' }}">
+    <label>关键词
+      <input name="word" value="{{ edit_keyword.word if edit_keyword else '' }}" required>
+    </label>
+    <label>语言
+      <select name="language">
+        {% for lang in ["mixed", "zh", "en"] %}
+          <option value="{{ lang }}" {% if edit_keyword and edit_keyword.language == lang %}selected{% endif %}>{{ lang }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>匹配方式
+      <select name="match_type">
+        {% for match_type in ["contains", "exact"] %}
+          <option value="{{ match_type }}" {% if edit_keyword and edit_keyword.match_type == match_type %}selected{% endif %}>{{ match_type }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>权重 1-10
+      <input name="weight" type="number" min="1" max="10" value="{{ edit_keyword.weight if edit_keyword else 5 }}">
+    </label>
+    <label class="checkbox-row">
+      <input name="enabled" type="checkbox" {% if not edit_keyword or edit_keyword.enabled %}checked{% endif %}> 启用
+    </label>
+    <label class="wide">备注
+      <input name="note" value="{{ edit_keyword.note if edit_keyword else '' }}">
+    </label>
+    <div class="wide form-actions">
+      <button type="submit">{{ "保存关键词" if edit_keyword else "新增关键词" }}</button>
+      {% if edit_keyword %}<a class="button secondary" href="/topics/{{ topic.id }}/keywords">取消编辑</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>关键词列表</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>词</th><th>语言</th><th>匹配</th><th>权重</th><th>状态</th><th>备注</th><th>操作</th></tr>
+      </thead>
+      <tbody>
+      {% for item in keywords %}
+        <tr>
+          <td>{{ item.word }}</td>
+          <td>{{ item.language }}</td>
+          <td>{{ item.match_type }}</td>
+          <td>{{ item.weight }}</td>
+          <td>{{ "启用" if item.enabled else "禁用" }}</td>
+          <td>{{ item.note }}</td>
+          <td class="row-actions">
+            <a href="/topics/{{ topic.id }}/keywords?edit_id={{ item.id }}">编辑</a>
+            <form method="post" action="/topics/{{ topic.id }}/keywords/{{ item.id }}/toggle" class="inline"><button type="submit" class="small">{{ "禁用" if item.enabled else "启用" }}</button></form>
+            <form method="post" action="/topics/{{ topic.id }}/keywords/{{ item.id }}/delete" class="inline delete-form"><button type="submit" class="small danger">删除</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

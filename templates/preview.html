@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}预览日报{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>日报预览</h1>
+
+  {% if mode == "snapshot" %}
+    <p class="muted">当前展示:最近发送快照{% if snapshot_time %}({{ snapshot_time }}){% endif %} · 零 API 成本</p>
+  {% elif mode == "live" %}
+    <p class="muted">当前展示:实时抓取结果 · 本次不落库</p>
+  {% endif %}
+
+  <p>
+    <a class="button secondary" href="/preview?live=1">重新实时抓取</a>
+    <small class="muted">实时抓取会消耗 Tavily / LLM API 配额,结果不写入数据库、不影响今日计数。</small>
+  </p>
+
+  {% if error %}
+    <p class="alert error">{{ error }}</p>
+  {% elif mode == "empty" %}
+    <p class="muted">暂无历史日报快照。点击「重新实时抓取」生成一次实时预览。</p>
+  {% else %}
+    <p class="muted">{{ subject }}</p>
+    <div class="preview-frame">{{ html | safe }}</div>
+  {% endif %}
+</section>
+{% endblock %}
