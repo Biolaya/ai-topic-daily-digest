@@ -1,6 +1,8 @@
-# ai-football-digest
+# ai-topic-daily-digest
 
-通用主题订阅日报系统。它会按数据库中启用的主题自动搜索新闻、去重、评分、生成中文 HTML 日报，并通过 Gmail SMTP 发送。AI 和 Football 只是默认初始化主题，不再是代码里的固定限制；你可以在 Web 后台添加 Minecraft、Finance、Coding Agents、Gaming、Anime 等任意主题。
+AI 驱动的通用主题订阅日报系统。它会按数据库中启用的主题自动搜索新闻、去重、评分，调用大模型生成中文 HTML 摘要日报，并通过 Gmail SMTP 发送。AI 和 Football 只是默认初始化主题，不再是代码里的固定限制；你可以在 Web 后台添加 Minecraft、Finance、Coding Agents、Gaming、Anime 等任意主题。
+
+> 项目早期叫 `ai-football-digest`,现已通用化为任意主题。代码与配置中仍可能残留该旧名,不影响功能。
 
 ## 功能
 
@@ -18,18 +20,21 @@
 ## 目录结构
 
 ```text
-ai-football-digest/
+ai-topic-daily-digest/
 ├── main.py
 ├── web.py
 ├── requirements.txt
 ├── .env.example
 ├── README.md
+├── LICENSE
+├── CLAUDE.md
 ├── data/
 │   └── app.sqlite3
 ├── logs/
 │   └── digest.log
 ├── src/
 │   ├── archiver.py
+│   ├── cleanup.py
 │   ├── config.py
 │   ├── database.py
 │   ├── dedupe.py
@@ -37,6 +42,7 @@ ai-football-digest/
 │   ├── models.py
 │   ├── renderer.py
 │   ├── runner.py
+│   ├── schedule.py
 │   ├── scorer.py
 │   ├── searcher.py
 │   ├── security.py
@@ -67,10 +73,14 @@ ai-football-digest/
 │   └── style.css
 └── tests/
     ├── test_archiver.py
+    ├── test_cleanup.py
     ├── test_dedupe.py
     ├── test_default_topics_seed.py
+    ├── test_failure_alert.py
+    ├── test_preview_persist.py
     ├── test_recipients.py
     ├── test_renderer_dynamic_sections.py
+    ├── test_schedule.py
     ├── test_scorer.py
     ├── test_search_topic_news.py
     ├── test_searcher_failover.py
@@ -85,7 +95,8 @@ ai-football-digest/
 需要 Python 3.10+。
 
 ```bash
-cd /home/admin/projects/ai-football-digest
+git clone https://github.com/Biolaya/ai-topic-daily-digest.git
+cd ai-topic-daily-digest
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -189,7 +200,7 @@ SMTP_PASS=Gmail App Password
 ## 初始化和迁移数据库
 
 ```bash
-cd /home/admin/projects/ai-football-digest
+cd ai-topic-daily-digest
 source .venv/bin/activate
 python -m src.database
 ```
@@ -242,7 +253,7 @@ python -m src.database
 ## Web 后台启动
 
 ```bash
-cd /home/admin/projects/ai-football-digest
+cd ai-topic-daily-digest
 .venv/bin/uvicorn web:app --host 127.0.0.1 --port 8001
 ```
 
@@ -351,14 +362,14 @@ ADMIN_PASSWORD=你的后台密码
 ## Gmail SMTP 测试
 
 ```bash
-cd /home/admin/projects/ai-football-digest
+cd ai-topic-daily-digest
 .venv/bin/python - <<'PY'
 from src.config import get_settings
 from src.emailer import send_email
 
 settings = get_settings()
 settings.validate(send=True)
-send_email(settings, "ai-football-digest SMTP 测试", "<h1>Gmail SMTP OK</h1>")
+send_email(settings, "ai-topic-daily-digest SMTP 测试", "<h1>Gmail SMTP OK</h1>")
 print("sent")
 PY
 ```
@@ -367,33 +378,27 @@ PY
 
 ## cron 每日任务
 
-每小时整点运行一次,由代码内的 send_time 守卫决定当天是否真正发送(到点后当天首个整点运行才发,且当天仅发一次):
+每小时整点运行一次,由代码内的 send_time 守卫决定当天是否真正发送(到点后当天首个整点运行才发,且当天仅发一次)。把下面的 `/path/to/ai-topic-daily-digest` 替换成你的实际部署路径:
 
 ```cron
-0 * * * * cd /home/admin/projects/ai-football-digest && /home/admin/projects/ai-football-digest/.venv/bin/python main.py --send >> logs/digest.log 2>&1
+0 * * * * cd /path/to/ai-topic-daily-digest && /path/to/ai-topic-daily-digest/.venv/bin/python main.py --send >> logs/digest.log 2>&1
 ```
 
 发送时间在 Web 后台 `/settings` 的「发送时间」配置(默认 06:00)。`--send --force` 可绕过守卫强制发送(调试/补发)。
 
-部署到 `/home/YOUR_USER/apps/ai-football-digest` 时，可使用：
-
-```cron
-0 * * * * cd /home/YOUR_USER/apps/ai-football-digest && /home/YOUR_USER/apps/ai-football-digest/.venv/bin/python main.py --send >> logs/digest.log 2>&1
-```
-
 ## systemd Web 服务示例
 
-创建 `/etc/systemd/system/ai-football-digest-web.service`：
+创建 `/etc/systemd/system/ai-topic-daily-digest-web.service`(把 `/path/to/ai-topic-daily-digest` 和 `YOUR_USER` 替换成实际值)：
 
 ```ini
 [Unit]
-Description=ai-football-digest Web Admin
+Description=ai-topic-daily-digest Web Admin
 After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/YOUR_USER/apps/ai-football-digest
-ExecStart=/home/YOUR_USER/apps/ai-football-digest/.venv/bin/uvicorn web:app --host 127.0.0.1 --port 8001
+WorkingDirectory=/path/to/ai-topic-daily-digest
+ExecStart=/path/to/ai-topic-daily-digest/.venv/bin/uvicorn web:app --host 127.0.0.1 --port 8001
 Restart=always
 RestartSec=5
 User=YOUR_USER
@@ -406,8 +411,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now ai-football-digest-web
-sudo systemctl status ai-football-digest-web
+sudo systemctl enable --now ai-topic-daily-digest-web
+sudo systemctl status ai-topic-daily-digest-web
 ```
 
 ## 公网部署安全提醒
@@ -421,7 +426,7 @@ sudo systemctl status ai-football-digest-web
 ## 测试
 
 ```bash
-cd /home/admin/projects/ai-football-digest
+cd ai-topic-daily-digest
 .venv/bin/python -m pytest -q
 ```
 
@@ -451,3 +456,7 @@ cd /home/admin/projects/ai-football-digest
 - 把发件人加入联系人。
 - 避免频繁发送测试邮件。
 - 自定义域名发信时配置 SPF、DKIM、DMARC。
+
+## 许可证
+
+本项目基于 [MIT License](LICENSE) 开源,可自由使用、修改和分发,只需保留版权与许可声明。
